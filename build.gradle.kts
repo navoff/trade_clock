@@ -4,3 +4,14 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
 }
+
+// Add Hilt plugin to classpath
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.google.dagger:hilt-android-gradle-plugin:2.50")
+    }
+}
