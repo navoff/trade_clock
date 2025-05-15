@@ -3,6 +3,7 @@ package com.navoff.tradeclock.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.navoff.tradeclock.domain.models.Exchange
+import com.navoff.tradeclock.domain.repositories.ExchangeRepository
 import com.navoff.tradeclock.domain.usecases.GetExchangesWithStatusUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ExchangeListViewModel @Inject constructor(
-    private val getExchangesWithStatusUseCase: GetExchangesWithStatusUseCase
+    private val getExchangesWithStatusUseCase: GetExchangesWithStatusUseCase,
+    private val exchangeRepository: ExchangeRepository
 ) : ViewModel() {
 
     /**
@@ -31,7 +33,8 @@ class ExchangeListViewModel @Inject constructor(
         val exchanges: List<Exchange> = emptyList(),
         val currentLocalTime: LocalDateTime = LocalDateTime.now(),
         val isLoading: Boolean = true,
-        val error: String? = null
+        val error: String? = null,
+        val isEditMode: Boolean = false
     )
 
     private val _uiState = MutableStateFlow(ExchangeListUiState())
@@ -129,9 +132,101 @@ class ExchangeListViewModel @Inject constructor(
 
     /**
      * Toggle the selection status of an exchange.
+     * @param exchangeId The ID of the exchange to toggle
      */
     fun toggleExchangeSelection(exchangeId: String) {
-        // Implementation will be added later
+        viewModelScope.launch {
+            val currentExchanges = _uiState.value.exchanges
+            val updatedExchanges = currentExchanges.map { exchange ->
+                if (exchange.id == exchangeId) {
+                    // Toggle the selection state for the selected exchange
+                    exchange.copy(isSelected = !exchange.isSelected)
+                } else {
+                    exchange
+                }
+            }
+
+            _uiState.value = _uiState.value.copy(
+                exchanges = updatedExchanges
+            )
+        }
+    }
+
+    /**
+     * Enter edit mode for the exchange list.
+     * In edit mode, we show all exchanges, not just the selected ones.
+     */
+    fun enterEditMode() {
+        viewModelScope.launch {
+            // Load all exchanges, not just selected ones
+            loadAllExchanges()
+
+            // Set edit mode flag
+            _uiState.value = _uiState.value.copy(
+                isEditMode = true
+            )
+        }
+    }
+
+    /**
+     * Load all exchanges from the repository, not just selected ones.
+     * This is used when entering edit mode.
+     */
+    private fun loadAllExchanges() {
+        viewModelScope.launch {
+            try {
+                exchangeRepository.getAllExchanges().stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = emptyList()
+                ).collect { exchanges ->
+                    // Update exchanges with current time information
+                    val updatedExchanges = updateExchangesWithTimeInfo(exchanges)
+
+                    _uiState.value = _uiState.value.copy(
+                        exchanges = updatedExchanges,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
+            }
+        }
+    }
+
+    /**
+     * Exit edit mode and discard changes.
+     */
+    fun cancelEditMode() {
+        // Reload exchanges to discard any selection changes
+        loadExchanges()
+        _uiState.value = _uiState.value.copy(
+            isEditMode = false
+        )
+    }
+
+    /**
+     * Save changes made in edit mode and exit edit mode.
+     */
+    fun saveChanges() {
+        viewModelScope.launch {
+            // Save the selection changes to the repository
+            _uiState.value.exchanges.forEach { exchange ->
+                exchangeRepository.updateExchangeSelection(exchange.id, exchange.isSelected)
+            }
+
+            // Exit edit mode
+            _uiState.value = _uiState.value.copy(
+                isEditMode = false
+            )
+
+            // Reload exchanges to reflect the changes
+            loadExchanges()
+        }
     }
 
     /**

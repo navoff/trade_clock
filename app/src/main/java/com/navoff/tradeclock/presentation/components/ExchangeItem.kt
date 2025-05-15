@@ -7,11 +7,14 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -19,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -101,9 +105,11 @@ private fun formatMinutesToTimeString(totalMinutes: Int): String {
 fun ExchangeItem(
     exchange: Exchange,
     onToggleExpanded: (String) -> Unit,
+    onToggleSelection: (String) -> Unit = {},
     onOpenSchedule: (String) -> Unit = { exchangeId ->
         // Default implementation remains the same
     },
+    isEditMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -113,125 +119,163 @@ fun ExchangeItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onToggleExpanded(exchange.id) },
+            .clickable {
+                if (!isEditMode) {
+                    onToggleExpanded(exchange.id)
+                }
+            },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+        // Go back to Row but with a different structure
+        Row(
+            modifier = Modifier.padding(
+                end = 16.dp,
+                top = 12.dp,
+                bottom = 12.dp
+            )
         ) {
-            // Header row with exchange name and local time
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = exchange.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = exchange.currentLocalTime.format(timeFormatter),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.width(8.dp)) // Фиксированное расстояние
-                Text(
-                    text = if (exchange.isOpen) "🟢" else "🔴",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+            // Show checkbox in edit mode in its own column
+            if (isEditMode) {
+                Checkbox(
+                    checked = exchange.isSelected,
+                    onCheckedChange = { onToggleSelection(exchange.id) },
+                    modifier = Modifier.padding(top = 0.dp)
                 )
             }
 
-            // Basic information row with country and trading hours
-            Row(
+            // Main content column
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .weight(1f)
+                    .padding(
+                        start = if (isEditMode) 0.dp else 16.dp
+                    )
             ) {
-                Text(
-                    text = "${exchange.flag} ${exchange.country}, ${exchange.city}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "${exchange.openingTime.format(timeFormatter)} - ${exchange.closingTime.format(timeFormatter)}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Icon(
-                    imageVector = if (exchange.isExpanded) Icons.Filled.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = if (exchange.isExpanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            }
 
-            // Expanded content
-            AnimatedVisibility(
-                visible = exchange.isExpanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
+                // Header row with exchange name and local time
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Divider(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant
+                    Text(
+                        text = exchange.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = exchange.currentLocalTime.format(timeFormatter),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
                     )
 
-                    // Status information with time remaining
-                    Row(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Spacer(modifier = Modifier.width(8.dp)) // Fixed distance
+                    Text(
+                        text = if (exchange.isOpen) "🟢" else "🔴",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                // Basic information row with country and trading hours
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${exchange.flag} ${exchange.country}, ${exchange.city}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "${exchange.openingTime.format(timeFormatter)} - ${
+                            exchange.closingTime.format(
+                                timeFormatter
+                            )
+                        }",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        imageVector = if (exchange.isExpanded && !isEditMode) Icons.Filled.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = if (exchange.isExpanded) "Collapse" else "Expand",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // Expanded content - only show when not in edit mode and exchange is expanded
+                AnimatedVisibility(
+                    visible = exchange.isExpanded && !isEditMode,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
                     ) {
-                        Text(
-                            text = "Status:",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
+                        Divider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
 
-                        // Calculate time remaining until opening/closing
-                        val timeRemaining = calculateTimeRemaining(exchange)
+                        // Status information with time remaining
+                        Row(
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Status:",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
 
-                        Text(
-                            text = if (exchange.isOpen) {
-                                "Open (closes in $timeRemaining)"
-                            } else {
-                                "Closed (opens in $timeRemaining)"
+                            // Calculate time remaining until opening/closing
+                            val timeRemaining = calculateTimeRemaining(exchange)
+
+                            Text(
+                                text = if (exchange.isOpen) {
+                                    "Open (closes in $timeRemaining)"
+                                } else {
+                                    "Closed (opens in $timeRemaining)"
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (exchange.isOpen)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.error
+                            )
+                        }
+
+                        // Button to view schedule
+                        TextButton(
+                            onClick = {
+                                // Check if scheduleUrl is not empty
+                                if (exchange.scheduleUrl.isNotEmpty()) {
+                                    // Open the exchange's schedule URL in the default browser
+                                    val intent =
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(exchange.scheduleUrl))
+                                    context.startActivity(intent)
+                                } else {
+                                    // Fallback URL if scheduleUrl is empty
+                                    val fallbackUrl = "https://www.google.com/search?q=${
+                                        exchange.name.replace(
+                                            " ",
+                                            "+"
+                                        )
+                                    }+trading+schedule"
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUrl))
+                                    context.startActivity(intent)
+                                }
                             },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (exchange.isOpen)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.error
-                        )
-                    }
-
-                    // Trading hours строка удалена по требованию
-
-                    // Button to view schedule
-                    TextButton(
-                        onClick = {
-                            // Check if scheduleUrl is not empty
-                            if (exchange.scheduleUrl.isNotEmpty()) {
-                                // Open the exchange's schedule URL in the default browser
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(exchange.scheduleUrl))
-                                context.startActivity(intent)
-                            } else {
-                                // Fallback URL if scheduleUrl is empty
-                                val fallbackUrl = "https://www.google.com/search?q=${exchange.name.replace(" ", "+")}+trading+schedule"
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUrl))
-                                context.startActivity(intent)
-                            }
-                        },
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text("View Schedule")
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text("View Schedule")
+                        }
                     }
                 }
             }

@@ -23,9 +23,91 @@ The current focus is on:
    - Creating a database migration to update the schema
    - Populating the database with more detailed exchange information
 
+4. Fixing exchange filtering functionality:
+   - Ensuring exchanges with unchecked checkboxes disappear from the list after pressing Save
+   - Showing all exchanges (not just selected ones) when in edit mode
+   - Maintaining correct checkbox state for each exchange in edit mode
+
 These features are critical for the app's core functionality, as users need accurate, up-to-date information about exchange operating hours presented in a visually intuitive way.
 
 ## Recent Changes
+
+### Exchange Filtering Functionality Fix
+
+We've fixed issues with the exchange filtering functionality:
+
+1. Fixed the issue where exchanges with unchecked checkboxes weren't disappearing from the list after pressing Save
+2. Implemented showing all exchanges (not just selected ones) when in edit mode
+3. Ensured checkboxes correctly reflect the current selection state of each exchange
+
+The implementation includes:
+
+```kotlin
+// In ExchangeListViewModel.kt
+
+// Save changes made in edit mode and exit edit mode
+fun saveChanges() {
+    viewModelScope.launch {
+        // Save the selection changes to the repository
+        _uiState.value.exchanges.forEach { exchange ->
+            exchangeRepository.updateExchangeSelection(exchange.id, exchange.isSelected)
+        }
+
+        // Exit edit mode
+        _uiState.value = _uiState.value.copy(
+            isEditMode = false
+        )
+
+        // Reload exchanges to reflect the changes
+        loadExchanges()
+    }
+}
+
+// Enter edit mode for the exchange list
+fun enterEditMode() {
+    viewModelScope.launch {
+        // Load all exchanges, not just selected ones
+        loadAllExchanges()
+
+        // Set edit mode flag
+        _uiState.value = _uiState.value.copy(
+            isEditMode = true
+        )
+    }
+}
+
+// Load all exchanges from the repository, not just selected ones
+private fun loadAllExchanges() {
+    viewModelScope.launch {
+        try {
+            exchangeRepository.getAllExchanges().stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            ).collect { exchanges ->
+                // Update exchanges with current time information
+                val updatedExchanges = updateExchangesWithTimeInfo(exchanges)
+
+                _uiState.value = _uiState.value.copy(
+                    exchanges = updatedExchanges,
+                    isLoading = false,
+                    error = null
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                error = e.message
+            )
+        }
+    }
+}
+```
+
+This implementation ensures:
+- After pressing Save, exchanges with unchecked checkboxes disappear from the list
+- When entering edit mode, all exchanges are available for selection
+- Checkboxes reflect the current selection state of each exchange
 
 ### UI Improvements
 
@@ -197,28 +279,47 @@ private fun calculateTimeRemaining(exchange: Exchange): String {
 
 ## Next Steps
 
-1. **Testing the Expandable Items Feature**:
+1. **Testing the Exchange Filtering Functionality**:
+   - Verify that exchanges with unchecked checkboxes disappear after pressing Save
+   - Confirm that all exchanges are shown in edit mode
+   - Ensure checkboxes correctly reflect the selection state
+
+2. **Testing the Expandable Items Feature**:
    - Verify that expanding/collapsing works correctly on all devices
    - Test the time remaining calculation for accuracy
    - Ensure animations are smooth and performant
 
-2. **UI Refinements**:
+3. **UI Refinements**:
    - Consider adding animations for status changes
    - Improve visual distinction between open and closed exchanges
    - Refine the expanded view layout for better readability
 
-3. **Performance Optimization**:
+4. **Performance Optimization**:
    - Profile the app to ensure time updates don't cause performance issues
    - Optimize the exchange status calculation if needed
    - Ensure efficient recomposition when items expand/collapse
 
-4. **Additional Features**:
+5. **Additional Features**:
    - Implement exchange filtering functionality
    - Add sorting options (by opening time, continent)
    - Consider adding a dark theme
    - Add ability to customize which information is shown in expanded view
 
 ## Active Decisions and Considerations
+
+### Exchange Filtering Implementation
+
+We chose to implement the exchange filtering functionality with a clear separation between normal mode and edit mode:
+
+1. **Normal Mode**: Only selected exchanges are shown
+2. **Edit Mode**: All exchanges are shown with their correct selection state
+3. **Save Changes**: Updates the database and returns to normal mode showing only selected exchanges
+4. **Cancel Edit**: Discards changes and returns to normal mode showing only selected exchanges
+
+This approach provides a clean user experience where users can:
+- See only their selected exchanges in normal mode
+- Edit the full list of exchanges when needed
+- Have their changes properly reflected after saving
 
 ### Time Update Approach
 
@@ -246,7 +347,8 @@ data class ExchangeListUiState(
     val exchanges: List<Exchange> = emptyList(),
     val currentLocalTime: LocalDateTime = LocalDateTime.now(),
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    val isEditMode: Boolean = false
 )
 ```
 
@@ -294,3 +396,4 @@ This handles both standard cases (where opening time is before closing time) and
 7. **Progressive Disclosure**: Hiding detailed information until needed improves initial comprehension
 8. **Visual Alignment**: Careful alignment of UI elements creates a more professional and intuitive interface
 9. **Time Calculation Complexity**: Calculating time remaining requires handling various edge cases like overnight periods
+10. **Edit Mode Patterns**: Separating view mode from edit mode provides a cleaner user experience

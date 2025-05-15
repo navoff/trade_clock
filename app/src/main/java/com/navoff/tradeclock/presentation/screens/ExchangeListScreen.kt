@@ -3,13 +3,24 @@ package com.navoff.tradeclock.presentation.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -50,11 +61,62 @@ fun ExchangeListScreen(
                         )
                     }
                 },
+                actions = {
+                    // Show edit button only when not in edit mode
+                    if (!uiState.isEditMode) {
+                        IconButton(onClick = { viewModel.enterEditMode() }) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit exchanges"
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
+        },
+        bottomBar = {
+            // Show bottom bar with Save/Cancel buttons only in edit mode
+            if (uiState.isEditMode) {
+                BottomAppBar(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                    ) {
+                        Button(
+                            onClick = { viewModel.cancelEditMode() },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Cancel"
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Cancel")
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Button(
+                            onClick = { viewModel.saveChanges() },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Save"
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Save")
+                        }
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         Box(
@@ -99,6 +161,10 @@ fun ExchangeListScreen(
                             onToggleExpanded = { exchangeId ->
                                 viewModel.toggleExchangeExpanded(exchangeId)
                             },
+                            onToggleSelection = { exchangeId ->
+                                viewModel.toggleExchangeSelection(exchangeId)
+                            },
+                            isEditMode = uiState.isEditMode,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }

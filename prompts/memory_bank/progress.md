@@ -12,6 +12,8 @@
 - ✅ Visual distinction between open and closed exchanges
 - ✅ Automatic time updates every minute when app is active
 - ✅ Immediate time updates when app is resumed
+- ✅ Exchange filtering functionality (showing/hiding based on selection)
+- ✅ Edit mode with all exchanges available for selection
 
 ### Technical Implementation
 - ✅ Dependency injection with Hilt
@@ -19,11 +21,11 @@
 - ✅ Time zone handling with ThreeTenABP
 - ✅ Lifecycle-aware components
 - ✅ Efficient time updates using BroadcastReceiver
+- ✅ Expandable exchange items with animations
 
 ## What's Left to Build
 
 ### Core Features
-- ⬜ Exchange filtering functionality
 - ⬜ User preferences storage with DataStore
 - ⬜ Sorting options (by opening time, continent)
 - ⬜ Detailed exchange information screen
@@ -45,23 +47,22 @@
 
 ## Current Status
 
-The app is in a functional state with the core time display and update features implemented. Users can see the current time in the header and the local time for each exchange, with automatic updates every minute when the app is active and immediate updates when the app is resumed.
+The app is in a functional state with the core time display, update features, and exchange filtering implemented. Users can see the current time in the header and the local time for each exchange, with automatic updates every minute when the app is active and immediate updates when the app is resumed. Users can also filter which exchanges to display by selecting/deselecting them in edit mode.
 
-The most recent implementation focused on the time update mechanism, using Android's BroadcastReceiver to listen for system time changes (ACTION_TIME_TICK) instead of a custom timer. This approach is more efficient and battery-friendly.
+The most recent implementation focused on fixing the exchange filtering functionality, ensuring that exchanges with unchecked checkboxes disappear from the list after pressing Save, and showing all exchanges (not just selected ones) when in edit mode.
 
-### Recent Milestone: Automatic Time Updates
-- Implemented BroadcastReceiver for time updates
-- Added proper lifecycle management
-- Modified ViewModel to update time and reload exchanges
-- Ensured immediate updates on app resume
+### Recent Milestone: Exchange Filtering Functionality
+- Fixed issue where unchecked exchanges weren't disappearing after pressing Save
+- Implemented showing all exchanges in edit mode
+- Ensured checkboxes correctly reflect the selection state of each exchange
+- Added proper database updates for exchange selection changes
 
 ## Known Issues
 
-1. **No Exchange Filtering**: Users cannot yet filter which exchanges to display
-2. **Limited Error Handling**: Error states need more comprehensive handling
-3. **No Persistence for User Preferences**: User preferences are not saved between sessions
-4. **No Offline Mode Indicator**: No indication when the app is working offline
-5. **Limited Testing**: Need more comprehensive test coverage
+1. **Limited Error Handling**: Error states need more comprehensive handling
+2. **No Persistence for User Preferences**: User preferences are not saved between sessions
+3. **No Offline Mode Indicator**: No indication when the app is working offline
+4. **Limited Testing**: Need more comprehensive test coverage
 
 ## Evolution of Project Decisions
 
@@ -73,13 +74,15 @@ The most recent implementation focused on the time update mechanism, using Andro
 | **UI Framework** | XML layouts | Jetpack Compose | Modern, declarative approach with better state management |
 | **State Management** | LiveData | StateFlow | Better integration with Kotlin Coroutines and Flow |
 | **Database** | SQLite direct | Room | Type safety, better integration with Kotlin |
+| **Exchange Filtering** | Filter in UI only | Database-backed selection | More robust, persists across app restarts |
 
 ### Feature Prioritization
 
 1. **Initial Focus**: Core exchange display with static data
 2. **Second Phase**: Time calculations and status display
-3. **Current Phase**: Automatic time updates
-4. **Next Phase**: User preferences and filtering
+3. **Third Phase**: Automatic time updates
+4. **Current Phase**: Exchange filtering and edit mode
+5. **Next Phase**: User preferences and sorting options
 
 ### Technical Debt
 
@@ -90,11 +93,11 @@ The most recent implementation focused on the time update mechanism, using Andro
 
 ## Next Development Priorities
 
-1. **Exchange Filtering**: Implement the ability for users to select which exchanges to display
-2. **User Preferences**: Add persistence for user settings using DataStore
-3. **UI Improvements**: Enhance the visual design and add animations
-4. **Testing**: Add comprehensive unit and UI tests
-5. **Dark Theme**: Implement support for dark theme
+1. **User Preferences**: Add persistence for user settings using DataStore
+2. **UI Improvements**: Enhance the visual design and add animations
+3. **Testing**: Add comprehensive unit and UI tests
+4. **Dark Theme**: Implement support for dark theme
+5. **Sorting Options**: Add ability to sort exchanges by different criteria
 
 ## Lessons Learned
 
@@ -103,3 +106,5 @@ The most recent implementation focused on the time update mechanism, using Andro
 3. **State Management**: A single state object simplifies UI updates and state management
 4. **Lifecycle Awareness**: Proper lifecycle management is crucial for resource-efficient apps
 5. **Compose Benefits**: Jetpack Compose significantly simplifies UI development and state management
+6. **Edit Mode Patterns**: Separating view mode from edit mode provides a cleaner user experience
+7. **Database Integration**: Properly integrating database operations with UI state updates ensures consistent user experience
