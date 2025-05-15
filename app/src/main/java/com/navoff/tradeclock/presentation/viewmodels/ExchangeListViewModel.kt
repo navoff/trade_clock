@@ -89,9 +89,11 @@ class ExchangeListViewModel @Inject constructor(
             }
 
             // Create a new Exchange object with updated time information
+            // Preserve the expanded state when updating time information
             exchange.copy(
                 currentLocalTime = localTime,
-                isOpen = isOpen
+                isOpen = isOpen,
+                isExpanded = exchange.isExpanded
             )
         }
     }
@@ -130,5 +132,29 @@ class ExchangeListViewModel @Inject constructor(
      */
     fun toggleExchangeSelection(exchangeId: String) {
         // Implementation will be added later
+    }
+
+    /**
+     * Toggle the expanded state of an exchange.
+     * @param exchangeId The ID of the exchange to toggle
+     */
+    fun toggleExchangeExpanded(exchangeId: String) {
+        viewModelScope.launch {
+            val currentExchanges = _uiState.value.exchanges
+            val updatedExchanges = currentExchanges.map { exchange ->
+                if (exchange.id == exchangeId) {
+                    // Toggle the expanded state for the selected exchange
+                    exchange.copy(isExpanded = !exchange.isExpanded)
+                } else {
+                    // Optionally, collapse other exchanges when one is expanded
+                    // exchange.copy(isExpanded = false)
+                    exchange
+                }
+            }
+
+            _uiState.value = _uiState.value.copy(
+                exchanges = updatedExchanges
+            )
+        }
     }
 }

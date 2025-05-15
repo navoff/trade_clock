@@ -90,9 +90,15 @@ fun ExchangeListScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(top = 8.dp) // Add top padding to the LazyColumn
                 ) {
-                    items(uiState.exchanges) { exchange ->
+                    items(
+                        items = uiState.exchanges,
+                        key = { it.id } // Use exchange ID as key for better animation handling
+                    ) { exchange ->
                         ExchangeItem(
                             exchange = exchange,
+                            onToggleExpanded = { exchangeId ->
+                                viewModel.toggleExchangeExpanded(exchangeId)
+                            },
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }

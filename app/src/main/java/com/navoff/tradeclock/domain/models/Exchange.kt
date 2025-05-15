@@ -21,5 +21,7 @@ data class Exchange(
     // Current local time at the exchange's location
     val currentLocalTime: LocalTime = LocalTime.now(timezone),
     // Whether the exchange is currently open
-    val isOpen: Boolean = false
+    val isOpen: Boolean = false,
+    // Whether the exchange item is expanded in the UI
+    val isExpanded: Boolean = false
 )

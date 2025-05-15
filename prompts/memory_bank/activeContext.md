@@ -140,25 +140,83 @@ fun updateCurrentTime() {
 }
 ```
 
+### Expandable Exchange Items
+
+We've implemented expandable exchange items to provide more detailed information on demand:
+
+1. Added ability to expand/collapse exchange items by clicking anywhere on the card
+2. Moved status indicator (🟢/🔴) to the right of local time
+3. Added an expand/collapse indicator (arrow) to the right of trading hours
+4. Implemented smooth animation for expanding/collapsing
+5. Added detailed status information in expanded view showing time until opening/closing
+6. Added a "View Schedule" button in expanded view to access exchange schedule
+
+The expandable items provide a clean, compact interface while still allowing users to access more detailed information when needed. The implementation includes:
+
+```kotlin
+// Added to Exchange model
+data class Exchange(
+    // ... existing fields
+    val isExpanded: Boolean = false
+)
+
+// Added to ExchangeListViewModel
+fun toggleExchangeExpanded(exchangeId: String) {
+    viewModelScope.launch {
+        val currentExchanges = _uiState.value.exchanges
+        val updatedExchanges = currentExchanges.map { exchange ->
+            if (exchange.id == exchangeId) {
+                // Toggle the expanded state for the selected exchange
+                exchange.copy(isExpanded = !exchange.isExpanded)
+            } else {
+                exchange
+            }
+        }
+
+        _uiState.value = _uiState.value.copy(
+            exchanges = updatedExchanges
+        )
+    }
+}
+
+// Time remaining calculation for expanded view
+private fun calculateTimeRemaining(exchange: Exchange): String {
+    val currentTime = exchange.currentLocalTime
+
+    return if (exchange.isOpen) {
+        // Calculate time until closing
+        val minutesUntilClosing = calculateMinutesUntil(currentTime, exchange.closingTime, exchange.openingTime)
+        formatMinutesToTimeString(minutesUntilClosing)
+    } else {
+        // Calculate time until opening
+        val minutesUntilOpening = calculateMinutesUntil(currentTime, exchange.openingTime, exchange.closingTime)
+        formatMinutesToTimeString(minutesUntilOpening)
+    }
+}
+```
+
 ## Next Steps
 
-1. **Testing the Time Update Feature**:
-   - Verify that the time updates correctly every minute
-   - Confirm that the time updates immediately when the app is resumed
-   - Test edge cases (e.g., app in background, device time changes)
+1. **Testing the Expandable Items Feature**:
+   - Verify that expanding/collapsing works correctly on all devices
+   - Test the time remaining calculation for accuracy
+   - Ensure animations are smooth and performant
 
 2. **UI Refinements**:
    - Consider adding animations for status changes
    - Improve visual distinction between open and closed exchanges
+   - Refine the expanded view layout for better readability
 
 3. **Performance Optimization**:
    - Profile the app to ensure time updates don't cause performance issues
    - Optimize the exchange status calculation if needed
+   - Ensure efficient recomposition when items expand/collapse
 
 4. **Additional Features**:
    - Implement exchange filtering functionality
    - Add sorting options (by opening time, continent)
    - Consider adding a dark theme
+   - Add ability to customize which information is shown in expanded view
 
 ## Active Decisions and Considerations
 
@@ -221,6 +279,9 @@ This handles both standard cases (where opening time is before closing time) and
 3. **Immutable State**: Using immutable data classes for UI state
 4. **Lifecycle Awareness**: Properly handling Android lifecycle events
 5. **Declarative UI**: Using Jetpack Compose for a declarative UI approach
+6. **Progressive Disclosure**: Using expandable items to show additional information only when needed
+7. **Visual Hierarchy**: Using alignment and spacing to create clear visual relationships between elements
+8. **Consistent Spacing**: Maintaining consistent spacing between related elements (e.g., 8.dp between time and status)
 
 ## Learnings and Project Insights
 
@@ -229,3 +290,7 @@ This handles both standard cases (where opening time is before closing time) and
 3. **UI State Management**: A single state object simplifies UI updates and state management
 4. **Lifecycle Management**: Proper lifecycle management is crucial for resource-efficient apps
 5. **Compose Recomposition**: Jetpack Compose efficiently recomposes only the parts of the UI that need to change
+6. **Animation Benefits**: Animations provide visual cues that help users understand state changes
+7. **Progressive Disclosure**: Hiding detailed information until needed improves initial comprehension
+8. **Visual Alignment**: Careful alignment of UI elements creates a more professional and intuitive interface
+9. **Time Calculation Complexity**: Calculating time remaining requires handling various edge cases like overnight periods
