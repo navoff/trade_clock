@@ -20,6 +20,10 @@ data class ExchangeEntity(
     val closingTimeHour: Int,
     val closingTimeMinute: Int,
     val continent: String,
+    val country: String,
+    val city: String,
+    val flag: String,
+    val scheduleUrl: String = "",
     val isSelected: Boolean = true
 ) {
     /**
@@ -33,6 +37,10 @@ data class ExchangeEntity(
             openingTime = LocalTime.of(openingTimeHour, openingTimeMinute),
             closingTime = LocalTime.of(closingTimeHour, closingTimeMinute),
             continent = continent,
+            country = country,
+            city = city,
+            flag = flag,
+            scheduleUrl = scheduleUrl,
             isSelected = isSelected
         )
     }
@@ -51,6 +59,10 @@ data class ExchangeEntity(
                 closingTimeHour = exchange.closingTime.hour,
                 closingTimeMinute = exchange.closingTime.minute,
                 continent = exchange.continent,
+                country = exchange.country,
+                city = exchange.city,
+                flag = exchange.flag,
+                scheduleUrl = exchange.scheduleUrl,
                 isSelected = exchange.isSelected
             )
         }

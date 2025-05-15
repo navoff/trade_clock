@@ -10,8 +10,6 @@ import com.navoff.tradeclock.data.database.entity.ExchangeEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.threeten.bp.LocalTime
-import org.threeten.bp.ZoneId
 
 /**
  * Room database for the TradeClock application.
@@ -36,14 +34,13 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     TradeClockDatabase::class.java,
                     "tradeclock_database"
                 )
+                .fallbackToDestructiveMigration()
                 .addCallback(object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
-                        // Populate the database with initial data when it's created
-                        INSTANCE?.let { database ->
-                            CoroutineScope(Dispatchers.IO).launch {
-                                populateDatabase(database.exchangeDao())
-                            }
+                        // Populate the database in a background thread
+                        CoroutineScope(Dispatchers.IO).launch {
+                            populateDatabase(INSTANCE!!.exchangeDao())
                         }
                     }
                 })
@@ -58,9 +55,8 @@ abstract class TradeClockDatabase : RoomDatabase() {
          * Populate the database with initial exchange data.
          */
         private suspend fun populateDatabase(exchangeDao: ExchangeDao) {
-            // Create a list of requested stock exchanges
+            // Create a list of stock exchanges with complete information
             val exchanges = listOf(
-                // Europe
                 ExchangeEntity(
                     id = "lse",
                     name = "London Stock Exchange",
@@ -69,8 +65,43 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     openingTimeMinute = 0,
                     closingTimeHour = 16,
                     closingTimeMinute = 30,
-                    continent = "Europe"
+                    continent = "Europe",
+                    country = "UK",
+                    city = "London",
+                    flag = "🇬🇧",
+                    scheduleUrl = "https://www.google.com/search?q=London+Stock+Exchange+trading+schedule"
                 ),
+
+                ExchangeEntity(
+                    id = "nyse",
+                    name = "New York Stock Exchange",
+                    timezoneName = "America/New_York",
+                    openingTimeHour = 9,
+                    openingTimeMinute = 30,
+                    closingTimeHour = 16,
+                    closingTimeMinute = 0,
+                    continent = "North America",
+                    country = "USA",
+                    city = "New York",
+                    flag = "🇺🇸",
+                    scheduleUrl = "https://www.nasdaq.com/market-activity/stock-market-holiday-schedule"
+                ),
+
+                ExchangeEntity(
+                    id = "tse",
+                    name = "Tokyo Stock Exchange",
+                    timezoneName = "Asia/Tokyo",
+                    openingTimeHour = 9,
+                    openingTimeMinute = 0,
+                    closingTimeHour = 15,
+                    closingTimeMinute = 30,
+                    continent = "Asia",
+                    country = "Japan",
+                    city = "Tokyo",
+                    flag = "🇯🇵",
+                    scheduleUrl = "https://www.jpx.co.jp/english/equities/trading/domestic/01.html"
+                ),
+
                 ExchangeEntity(
                     id = "seb",
                     name = "Swiss Electronic Bourse",
@@ -79,19 +110,26 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     openingTimeMinute = 0,
                     closingTimeHour = 17,
                     closingTimeMinute = 30,
-                    continent = "Europe"
+                    continent = "Europe",
+                    country = "Switzerland",
+                    city = "Zurich",
+                    flag = "🇨🇭",
+                    scheduleUrl = "https://www.six-group.com/en/products-services/the-swiss-stock-exchange/trading/trading-provisions/trading-hours.html#scrollTo=trading-hours-overview"
                 ),
 
-                // North America
                 ExchangeEntity(
                     id = "bmv",
                     name = "Bolsa Mexicana de Valores",
                     timezoneName = "America/Mexico_City",
-                    openingTimeHour = 8,
+                    openingTimeHour = 7,
                     openingTimeMinute = 30,
-                    closingTimeHour = 15,
+                    closingTimeHour = 14,
                     closingTimeMinute = 0,
-                    continent = "North America"
+                    continent = "North America",
+                    country = "Mexico",
+                    city = "Mexico City",
+                    flag = "🇲🇽",
+                    scheduleUrl = "https://www.bmv.com.mx/en/Grupo_BMV/Calendario_de_dias_festivos/_rid/662/_mod/TAB_HORARIOS_NEG"
                 )
             )
 

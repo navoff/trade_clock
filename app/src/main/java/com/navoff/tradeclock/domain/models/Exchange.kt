@@ -13,5 +13,13 @@ data class Exchange(
     val openingTime: LocalTime,
     val closingTime: LocalTime,
     val continent: String,
-    val isSelected: Boolean = true
+    val country: String,
+    val city: String,
+    val flag: String,
+    val scheduleUrl: String = "",
+    val isSelected: Boolean = true,
+    // Current local time at the exchange's location
+    val currentLocalTime: LocalTime = LocalTime.now(timezone),
+    // Whether the exchange is currently open
+    val isOpen: Boolean = false
 )

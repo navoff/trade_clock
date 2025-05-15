@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDateTime
+import org.threeten.bp.LocalTime
 import org.threeten.bp.ZoneId
+import org.threeten.bp.ZonedDateTime
 import javax.inject.Inject
 
 /**
@@ -51,8 +53,11 @@ class ExchangeListViewModel @Inject constructor(
                     started = SharingStarted.WhileSubscribed(5000),
                     initialValue = emptyList()
                 ).collect { exchanges ->
+                    // Update exchanges with current time information
+                    val updatedExchanges = updateExchangesWithTimeInfo(exchanges)
+
                     _uiState.value = _uiState.value.copy(
-                        exchanges = exchanges,
+                        exchanges = updatedExchanges,
                         isLoading = false,
                         error = null
                     )
@@ -67,14 +72,56 @@ class ExchangeListViewModel @Inject constructor(
     }
 
     /**
-     * Update the current time.
-     * This should be called periodically to keep the time up to date.
+     * Update exchanges with current time information.
+     * This calculates the current local time and open/closed status for each exchange.
      */
-    private fun updateCurrentTime() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                currentLocalTime = LocalDateTime.now()
+    private fun updateExchangesWithTimeInfo(exchanges: List<Exchange>): List<Exchange> {
+        return exchanges.map { exchange ->
+            // Calculate current local time at the exchange's location
+            val now = ZonedDateTime.now(exchange.timezone)
+            val localTime = LocalTime.of(now.hour, now.minute)
+
+            // Calculate if the exchange is open
+            val isOpen = if (exchange.openingTime.isBefore(exchange.closingTime)) {
+                localTime.isAfter(exchange.openingTime) && localTime.isBefore(exchange.closingTime)
+            } else {
+                localTime.isAfter(exchange.openingTime) || localTime.isBefore(exchange.closingTime)
+            }
+
+            // Create a new Exchange object with updated time information
+            exchange.copy(
+                currentLocalTime = localTime,
+                isOpen = isOpen
             )
+        }
+    }
+
+    /**
+     * Update the current time and exchange statuses.
+     * This is called by the MainActivity when the system time changes (every minute)
+     * or when the app is resumed.
+     */
+    fun updateCurrentTime() {
+        viewModelScope.launch {
+            // Update the current time in the UI state
+            val currentTime = LocalDateTime.now()
+
+            if (_uiState.value.exchanges.isEmpty()) {
+                // If no exchanges are loaded yet, load them
+                _uiState.value = _uiState.value.copy(
+                    currentLocalTime = currentTime
+                )
+                loadExchanges()
+            } else {
+                // Update the exchange list with current time information
+                val updatedExchanges = updateExchangesWithTimeInfo(_uiState.value.exchanges)
+
+                // Update the UI state with the new exchange list and current time
+                _uiState.value = _uiState.value.copy(
+                    currentLocalTime = currentTime,
+                    exchanges = updatedExchanges
+                )
+            }
         }
     }
 
