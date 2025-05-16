@@ -14,6 +14,7 @@
 - ✅ Immediate time updates when app is resumed
 - ✅ Exchange filtering functionality (showing/hiding based on selection)
 - ✅ Edit mode with all exchanges available for selection
+- ✅ Drag and drop reordering of exchanges in edit mode
 
 ### Technical Implementation
 - ✅ Dependency injection with Hilt
@@ -22,12 +23,13 @@
 - ✅ Lifecycle-aware components
 - ✅ Efficient time updates using BroadcastReceiver
 - ✅ Expandable exchange items with animations
+- ✅ Haptic feedback for interactive elements
 
 ## What's Left to Build
 
 ### Core Features
 - ⬜ User preferences storage with DataStore
-- ⬜ Sorting options (by opening time, continent)
+- ⬜ Additional sorting options (by opening time, continent)
 - ⬜ Detailed exchange information screen
 - ⬜ Search functionality
 
@@ -47,11 +49,24 @@
 
 ## Current Status
 
-The app is in a functional state with the core time display, update features, and exchange filtering implemented. Users can see the current time in the header and the local time for each exchange, with automatic updates every minute when the app is active and immediate updates when the app is resumed. Users can also filter which exchanges to display by selecting/deselecting them in edit mode.
+The app is in a functional state with the core time display, update features, exchange filtering, and drag and drop reordering implemented. Users can see the current time in the header and the local time for each exchange, with automatic updates every minute when the app is active and immediate updates when the app is resumed. Users can filter which exchanges to display by selecting/deselecting them in edit mode, and can also reorder exchanges using drag and drop.
 
-The most recent implementation focused on fixing the exchange filtering functionality, ensuring that exchanges with unchecked checkboxes disappear from the list after pressing Save, and showing all exchanges (not just selected ones) when in edit mode.
+The most recent work focused on fixing a bug where the new order of exchanges wasn't being saved when the "Save" button was pressed. This fix ensures that users' custom ordering of exchanges is properly persisted to the database, providing a consistent experience across app sessions.
 
-### Recent Milestone: Exchange Filtering Functionality
+### Recent Milestone: Bug Fix for Exchange Order Saving
+- Fixed the bug where the new order of exchanges wasn't being saved when pressing Save
+- Changed the order of operations in saveChanges() to save display order first
+- Added error handling with try-catch block to better handle and report errors
+- Ensured the display order is correctly saved to the database before exiting edit mode
+
+### Previous Milestone: Drag and Drop Reordering
+- Implemented long-press gesture to initiate dragging of exchange items
+- Added reordering logic to update the list when items are moved
+- Implemented haptic feedback for better user experience during dragging
+- Enhanced the UI with visual feedback during drag operations
+- Added persistence of custom order to the database
+
+### Previous Milestone: Exchange Filtering Functionality
 - Fixed issue where unchecked exchanges weren't disappearing after pressing Save
 - Implemented showing all exchanges in edit mode
 - Ensured checkboxes correctly reflect the selection state of each exchange
@@ -75,14 +90,16 @@ The most recent implementation focused on fixing the exchange filtering function
 | **State Management** | LiveData | StateFlow | Better integration with Kotlin Coroutines and Flow |
 | **Database** | SQLite direct | Room | Type safety, better integration with Kotlin |
 | **Exchange Filtering** | Filter in UI only | Database-backed selection | More robust, persists across app restarts |
+| **Exchange Ordering** | Fixed order | User-defined order with drag & drop | Allows users to prioritize important exchanges |
 
 ### Feature Prioritization
 
 1. **Initial Focus**: Core exchange display with static data
 2. **Second Phase**: Time calculations and status display
 3. **Third Phase**: Automatic time updates
-4. **Current Phase**: Exchange filtering and edit mode
-5. **Next Phase**: User preferences and sorting options
+4. **Fourth Phase**: Exchange filtering and edit mode
+5. **Current Phase**: Exchange reordering with drag and drop
+6. **Next Phase**: User preferences and additional sorting options
 
 ### Technical Debt
 
@@ -97,7 +114,7 @@ The most recent implementation focused on fixing the exchange filtering function
 2. **UI Improvements**: Enhance the visual design and add animations
 3. **Testing**: Add comprehensive unit and UI tests
 4. **Dark Theme**: Implement support for dark theme
-5. **Sorting Options**: Add ability to sort exchanges by different criteria
+5. **Additional Sorting Options**: Add ability to sort exchanges by different criteria (beyond manual ordering)
 
 ## Lessons Learned
 
@@ -108,3 +125,8 @@ The most recent implementation focused on fixing the exchange filtering function
 5. **Compose Benefits**: Jetpack Compose significantly simplifies UI development and state management
 6. **Edit Mode Patterns**: Separating view mode from edit mode provides a cleaner user experience
 7. **Database Integration**: Properly integrating database operations with UI state updates ensures consistent user experience
+8. **Gesture Recognition**: Long-press gestures with proper feedback create intuitive interactions
+9. **Third-Party Libraries**: Carefully evaluating and integrating libraries like Reorderable can save development time
+10. **Haptic Feedback**: Tactile feedback significantly improves the user experience for interactive elements
+11. **Operation Order**: The order of database operations can be critical, especially when multiple related updates are performed
+12. **Error Handling**: Proper error handling with try-catch blocks helps identify and resolve issues more effectively

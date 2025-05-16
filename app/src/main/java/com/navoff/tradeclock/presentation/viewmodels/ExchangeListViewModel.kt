@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.LocalTime
-import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 import javax.inject.Inject
 
@@ -34,7 +33,8 @@ class ExchangeListViewModel @Inject constructor(
         val currentLocalTime: LocalDateTime = LocalDateTime.now(),
         val isLoading: Boolean = true,
         val error: String? = null,
-        val isEditMode: Boolean = false
+        val isEditMode: Boolean = false,
+        val isDragging: Boolean = false
     )
 
     private val _uiState = MutableStateFlow(ExchangeListUiState())
@@ -214,18 +214,37 @@ class ExchangeListViewModel @Inject constructor(
      */
     fun saveChanges() {
         viewModelScope.launch {
-            // Save the selection changes to the repository
-            _uiState.value.exchanges.forEach { exchange ->
-                exchangeRepository.updateExchangeSelection(exchange.id, exchange.isSelected)
+            try {
+                // Create a map of exchange IDs to their indices in the list
+                val updates = _uiState.value.exchanges.mapIndexed { index, exchange ->
+                    exchange.id to index
+                }.toMap()
+
+                // Save the display order to the database
+                exchangeRepository.updateExchangeDisplayOrders(updates)
+
+                // Save the selection changes to the repository
+                _uiState.value.exchanges.forEach { exchange ->
+                    exchangeRepository.updateExchangeSelection(exchange.id, exchange.isSelected)
+                }
+
+                // Exit edit mode
+                _uiState.value = _uiState.value.copy(
+                    isEditMode = false
+                )
+
+                // Reload exchanges to reflect the changes
+                loadExchanges()
+            } catch (e: Exception) {
+                // Log the error
+                println("Error saving changes: ${e.message}")
+                e.printStackTrace()
+
+                // Update UI state with error
+                _uiState.value = _uiState.value.copy(
+                    error = "Failed to save changes: ${e.message}"
+                )
             }
-
-            // Exit edit mode
-            _uiState.value = _uiState.value.copy(
-                isEditMode = false
-            )
-
-            // Reload exchanges to reflect the changes
-            loadExchanges()
         }
     }
 
@@ -251,5 +270,47 @@ class ExchangeListViewModel @Inject constructor(
                 exchanges = updatedExchanges
             )
         }
+    }
+
+    /**
+     * Reorder exchanges by moving an exchange from one position to another.
+     * @param fromIndex The original position of the exchange
+     * @param toIndex The new position for the exchange
+     */
+    fun reorderExchanges(fromIndex: Int, toIndex: Int) {
+        viewModelScope.launch {
+            val currentExchanges = _uiState.value.exchanges.toMutableList()
+
+            if (fromIndex < toIndex) {
+                // Moving down
+                for (i in fromIndex until toIndex) {
+                    val temp = currentExchanges[i]
+                    currentExchanges[i] = currentExchanges[i + 1]
+                    currentExchanges[i + 1] = temp
+                }
+            } else {
+                // Moving up
+                for (i in fromIndex downTo toIndex + 1) {
+                    val temp = currentExchanges[i]
+                    currentExchanges[i] = currentExchanges[i - 1]
+                    currentExchanges[i - 1] = temp
+                }
+            }
+
+            // Update UI immediately with the new order
+            _uiState.value = _uiState.value.copy(
+                exchanges = currentExchanges
+            )
+        }
+    }
+
+    /**
+     * Set the dragging state.
+     * @param isDragging Whether an exchange is currently being dragged
+     */
+    fun setDragging(isDragging: Boolean) {
+        _uiState.value = _uiState.value.copy(
+            isDragging = isDragging
+        )
     }
 }

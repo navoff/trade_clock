@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -29,14 +31,19 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.navoff.tradeclock.presentation.components.ExchangeItem
 import com.navoff.tradeclock.presentation.viewmodels.ExchangeListViewModel
 import org.threeten.bp.format.DateTimeFormatter
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 /**
  * Main screen that displays the list of exchanges.
@@ -148,25 +155,78 @@ fun ExchangeListScreen(
                         .align(Alignment.Center)
                 )
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 8.dp) // Add top padding to the LazyColumn
-                ) {
-                    items(
-                        items = uiState.exchanges,
-                        key = { it.id } // Use exchange ID as key for better animation handling
-                    ) { exchange ->
-                        ExchangeItem(
-                            exchange = exchange,
-                            onToggleExpanded = { exchangeId ->
-                                viewModel.toggleExchangeExpanded(exchangeId)
-                            },
-                            onToggleSelection = { exchangeId ->
-                                viewModel.toggleExchangeSelection(exchangeId)
-                            },
-                            isEditMode = uiState.isEditMode,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
+                if (uiState.isEditMode) {
+                    val hapticFeedback = LocalHapticFeedback.current
+                    val lazyListState = rememberLazyListState()
+                    val reorderableLazyListState = rememberReorderableLazyListState(
+                        lazyListState = lazyListState,
+                        onMove = { from, to ->
+                            viewModel.reorderExchanges(from.index, to.index)
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        }
+                    )
+
+                    LazyColumn(
+                        state = lazyListState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(top = 8.dp)
+                    ) {
+                        itemsIndexed(
+                            items = uiState.exchanges,
+                            key = { _, exchange -> exchange.id }
+                        ) { index, exchange ->
+                            ReorderableItem(
+                                state = reorderableLazyListState,
+                                key = exchange.id
+                            ) { isDragging ->
+                                ExchangeItem(
+                                    exchange = exchange,
+                                    onToggleExpanded = { exchangeId ->
+                                        viewModel.toggleExchangeExpanded(exchangeId)
+                                    },
+                                    onToggleSelection = { exchangeId ->
+                                        viewModel.toggleExchangeSelection(exchangeId)
+                                    },
+                                    isEditMode = true,
+                                    isDragging = isDragging,
+                                    modifier = Modifier
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        .longPressDraggableHandle(
+                                            onDragStarted = {
+                                                viewModel.setDragging(true)
+                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            },
+                                            onDragStopped = {
+                                                viewModel.setDragging(false)
+                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            }
+                                        )
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    // Use regular LazyColumn when not in edit mode
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(top = 8.dp)
+                    ) {
+                        items(
+                            items = uiState.exchanges,
+                            key = { it.id }
+                        ) { exchange ->
+                            ExchangeItem(
+                                exchange = exchange,
+                                onToggleExpanded = { exchangeId ->
+                                    viewModel.toggleExchangeExpanded(exchangeId)
+                                },
+                                onToggleSelection = { exchangeId ->
+                                    viewModel.toggleExchangeSelection(exchangeId)
+                                },
+                                isEditMode = uiState.isEditMode,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
                     }
                 }
             }

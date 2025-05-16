@@ -3,6 +3,7 @@ package com.navoff.tradeclock.presentation.components
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.navoff.tradeclock.domain.models.Exchange
 import org.threeten.bp.format.DateTimeFormatter
+import androidx.core.net.toUri
 
 /**
  * Composable function for displaying an exchange item in the list.
@@ -106,14 +109,18 @@ fun ExchangeItem(
     exchange: Exchange,
     onToggleExpanded: (String) -> Unit,
     onToggleSelection: (String) -> Unit = {},
-    onOpenSchedule: (String) -> Unit = { exchangeId ->
-        // Default implementation remains the same
-    },
     isEditMode: Boolean = false,
+    isDragging: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     val context = LocalContext.current
+
+    // Animate elevation when dragging
+    val elevation = animateFloatAsState(
+        targetValue = if (isDragging) 8f else 4f,
+        label = "Card Elevation"
+    )
 
     Card(
         modifier = modifier
@@ -124,7 +131,7 @@ fun ExchangeItem(
                     onToggleExpanded(exchange.id)
                 }
             },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation.value.dp)
     ) {
         // Go back to Row but with a different structure
         Row(
@@ -217,7 +224,7 @@ fun ExchangeItem(
                             .fillMaxWidth()
                             .padding(top = 8.dp)
                     ) {
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.padding(vertical = 8.dp),
                             color = MaterialTheme.colorScheme.outlineVariant
                         )
@@ -258,7 +265,7 @@ fun ExchangeItem(
                                 if (exchange.scheduleUrl.isNotEmpty()) {
                                     // Open the exchange's schedule URL in the default browser
                                     val intent =
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(exchange.scheduleUrl))
+                                        Intent(Intent.ACTION_VIEW, exchange.scheduleUrl.toUri())
                                     context.startActivity(intent)
                                 } else {
                                     // Fallback URL if scheduleUrl is empty
@@ -268,7 +275,7 @@ fun ExchangeItem(
                                             "+"
                                         )
                                     }+trading+schedule"
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUrl))
+                                    val intent = Intent(Intent.ACTION_VIEW, fallbackUrl.toUri())
                                     context.startActivity(intent)
                                 }
                             },
