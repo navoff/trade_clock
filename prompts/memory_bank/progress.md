@@ -53,7 +53,14 @@ The app is in a functional state with the core time display, update features, ex
 
 The most recent work focused on fixing a bug where the new order of exchanges wasn't being saved when the "Save" button was pressed. This fix ensures that users' custom ordering of exchanges is properly persisted to the database, providing a consistent experience across app sessions.
 
-### Recent Milestone: Bug Fix for Exchange Order Saving
+### Recent Milestone: Database Enhancement with New Exchanges
+- Added Moscow Exchange (MOEX) with trading hours 9:50 - 18:50 Moscow time
+- Added Hong Kong Stock Exchange (HKEX) with trading hours 9:30 - 16:00 Hong Kong time
+- Added NASDAQ with trading hours 9:30 - 16:00 Eastern time
+- Standardized all schedule URLs to use tradinghours.com for consistency
+- Enhanced global market coverage for users
+
+### Previous Milestone: Bug Fix for Exchange Order Saving
 - Fixed the bug where the new order of exchanges wasn't being saved when pressing Save
 - Changed the order of operations in saveChanges() to save display order first
 - Added error handling with try-catch block to better handle and report errors

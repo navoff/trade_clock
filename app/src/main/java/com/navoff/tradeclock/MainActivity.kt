@@ -10,9 +10,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.navoff.tradeclock.presentation.components.UserAgreementDialog
 import com.navoff.tradeclock.presentation.screens.ExchangeListScreen
 import com.navoff.tradeclock.presentation.viewmodels.ExchangeListViewModel
+import com.navoff.tradeclock.presentation.viewmodels.UserAgreementViewModel
 import com.navoff.tradeclock.ui.theme.TradeClockTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,14 +26,15 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: ExchangeListViewModel by viewModels()
+    private val exchangeViewModel: ExchangeListViewModel by viewModels()
+    private val agreementViewModel: UserAgreementViewModel by viewModels()
 
     // BroadcastReceiver to listen for time tick events (sent every minute)
     private val timeTickReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == Intent.ACTION_TIME_TICK) {
                 // Update time in ViewModel when system time changes
-                viewModel.updateCurrentTime()
+                exchangeViewModel.updateCurrentTime()
             }
         }
     }
@@ -39,9 +44,23 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TradeClockTheme {
+                // Collect the agreement state
+                val agreementState by agreementViewModel.uiState.collectAsState()
+
+                // Show the main screen
                 ExchangeListScreen(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = exchangeViewModel
                 )
+
+                // Show the agreement dialog if the user hasn't accepted it yet
+                if (!agreementState.isLoading && !agreementState.hasAcceptedAgreement) {
+                    UserAgreementDialog(
+                        onAccept = {
+                            agreementViewModel.acceptAgreement()
+                        }
+                    )
+                }
             }
         }
     }
@@ -53,7 +72,7 @@ class MainActivity : ComponentActivity() {
         registerReceiver(timeTickReceiver, IntentFilter(Intent.ACTION_TIME_TICK))
 
         // Update time immediately when app is resumed
-        viewModel.updateCurrentTime()
+        exchangeViewModel.updateCurrentTime()
     }
 
     override fun onPause() {

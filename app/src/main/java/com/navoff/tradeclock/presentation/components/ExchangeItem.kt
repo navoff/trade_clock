@@ -125,7 +125,7 @@ fun ExchangeItem(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(vertical = 4.dp, horizontal = 4.dp)
             .clickable {
                 if (!isEditMode) {
                     onToggleExpanded(exchange.id)

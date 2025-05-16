@@ -44,6 +44,31 @@ These features are critical for the app's core functionality, as users need accu
 
 ## Recent Changes
 
+### Database Enhancement: Added New Exchanges
+
+We've expanded the database with additional stock exchanges:
+
+1. Added Moscow Exchange (MOEX):
+   - Located in Moscow, Russia (Europe)
+   - Trading hours: 9:50 - 18:50 Moscow time
+   - Added country, city, and flag (🇷🇺) information
+
+2. Added Hong Kong Stock Exchange (HKEX):
+   - Located in Hong Kong (Asia)
+   - Trading hours: 9:30 - 16:00 Hong Kong time
+   - Added country, city, and flag (🇭🇰) information
+
+3. Added NASDAQ:
+   - Located in New York, USA (North America)
+   - Trading hours: 9:30 - 16:00 Eastern time
+   - Added country, city, and flag (🇺🇸) information
+
+4. Standardized schedule URLs:
+   - Updated all exchange schedule URLs to use tradinghours.com for consistency
+   - Example: https://www.tradinghours.com/markets/moex
+
+These additions provide users with more comprehensive global market coverage and consistent access to trading hours information.
+
 ### Bug Fix: Exchange Order Not Saving
 
 We've fixed the bug where the new order of exchanges wasn't being saved when the "Save" button was pressed:

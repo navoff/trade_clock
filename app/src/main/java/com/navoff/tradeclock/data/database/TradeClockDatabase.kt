@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
  */
 @Database(
     entities = [ExchangeEntity::class],
-    version = 2, // Increased version number
+    version = 1,
     exportSchema = false
 )
 abstract class TradeClockDatabase : RoomDatabase() {
@@ -28,30 +28,6 @@ abstract class TradeClockDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: TradeClockDatabase? = null
 
-        /**
-         * Migration from database version 1 to 2.
-         * Adds the displayOrder column to the exchanges table and initializes it based on the current order.
-         */
-        private val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                // Add the displayOrder column with a default value of 0
-                database.execSQL("ALTER TABLE exchanges ADD COLUMN displayOrder INTEGER NOT NULL DEFAULT 0")
-
-                // Initialize displayOrder for each exchange based on ID to ensure a stable order
-                // This is a simpler approach that avoids complex subqueries
-                val cursor = database.query("SELECT id FROM exchanges ORDER BY continent, name")
-                var order = 0
-
-                cursor.use {
-                    while (cursor.moveToNext()) {
-                        val id = cursor.getString(cursor.getColumnIndexOrThrow("id"))
-                        database.execSQL("UPDATE exchanges SET displayOrder = $order WHERE id = '$id'")
-                        order++
-                    }
-                }
-            }
-        }
-
         fun getDatabase(context: Context): TradeClockDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -59,7 +35,7 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     TradeClockDatabase::class.java,
                     "tradeclock_database"
                 )
-                .addMigrations(MIGRATION_1_2) // Add the migration
+                .fallbackToDestructiveMigration()
                 .addCallback(object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
@@ -94,7 +70,7 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "UK",
                     city = "London",
                     flag = "🇬🇧",
-                    scheduleUrl = "https://www.google.com/search?q=London+Stock+Exchange+trading+schedule"
+                    scheduleUrl = "https://www.tradinghours.com/markets/lse"
                 ),
 
                 ExchangeEntity(
@@ -109,7 +85,7 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "USA",
                     city = "New York",
                     flag = "🇺🇸",
-                    scheduleUrl = "https://www.nasdaq.com/market-activity/stock-market-holiday-schedule"
+                    scheduleUrl = "https://www.tradinghours.com/markets/nyse"
                 ),
 
                 ExchangeEntity(
@@ -124,7 +100,7 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "Japan",
                     city = "Tokyo",
                     flag = "🇯🇵",
-                    scheduleUrl = "https://www.jpx.co.jp/english/equities/trading/domestic/01.html"
+                    scheduleUrl = "https://www.tradinghours.com/markets/tse"
                 ),
 
                 ExchangeEntity(
@@ -139,7 +115,7 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "Switzerland",
                     city = "Zurich",
                     flag = "🇨🇭",
-                    scheduleUrl = "https://www.six-group.com/en/products-services/the-swiss-stock-exchange/trading/trading-provisions/trading-hours.html#scrollTo=trading-hours-overview"
+                    scheduleUrl = "https://www.tradinghours.com/markets/seb"
                 ),
 
                 ExchangeEntity(
@@ -154,7 +130,52 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "Mexico",
                     city = "Mexico City",
                     flag = "🇲🇽",
-                    scheduleUrl = "https://www.bmv.com.mx/en/Grupo_BMV/Calendario_de_dias_festivos/_rid/662/_mod/TAB_HORARIOS_NEG"
+                    scheduleUrl = "https://www.tradinghours.com/markets/bmv"
+                ),
+
+                ExchangeEntity(
+                    id = "moex",
+                    name = "Moscow Exchange",
+                    timezoneName = "Europe/Moscow",
+                    openingTimeHour = 9,
+                    openingTimeMinute = 50,
+                    closingTimeHour = 18,
+                    closingTimeMinute = 50,
+                    continent = "Europe",
+                    country = "Russia",
+                    city = "Moscow",
+                    flag = "🇷🇺",
+                    scheduleUrl = "https://www.tradinghours.com/markets/moex"
+                ),
+
+                ExchangeEntity(
+                    id = "hkex",
+                    name = "Hong Kong Stock Exchange",
+                    timezoneName = "Asia/Hong_Kong",
+                    openingTimeHour = 9,
+                    openingTimeMinute = 30,
+                    closingTimeHour = 16,
+                    closingTimeMinute = 0,
+                    continent = "Asia",
+                    country = "Hong Kong",
+                    city = "Hong Kong",
+                    flag = "🇭🇰",
+                    scheduleUrl = "https://www.tradinghours.com/markets/hkex"
+                ),
+
+                ExchangeEntity(
+                    id = "nasdaq",
+                    name = "NASDAQ",
+                    timezoneName = "America/New_York",
+                    openingTimeHour = 9,
+                    openingTimeMinute = 30,
+                    closingTimeHour = 16,
+                    closingTimeMinute = 0,
+                    continent = "North America",
+                    country = "USA",
+                    city = "New York",
+                    flag = "🇺🇸",
+                    scheduleUrl = "https://www.tradinghours.com/markets/nasdaq"
                 )
             )
 
