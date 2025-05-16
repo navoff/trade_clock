@@ -32,4 +32,18 @@ interface ExchangeRepository {
      * @return The exchange if found, null otherwise
      */
     suspend fun getExchangeById(exchangeId: String): Exchange?
+
+    /**
+     * Update the display order of an exchange.
+     * @param exchangeId ID of the exchange to update
+     * @param displayOrder New display order value
+     */
+    suspend fun updateExchangeDisplayOrder(exchangeId: String, displayOrder: Int)
+
+    /**
+     * Update the display order of multiple exchanges in a single transaction.
+     * This is used when reordering exchanges with drag and drop.
+     * @param updates Map of exchange IDs to their new display order values
+     */
+    suspend fun updateExchangeDisplayOrders(updates: Map<String, Int>)
 }

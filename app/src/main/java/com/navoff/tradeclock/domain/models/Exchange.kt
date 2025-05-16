@@ -18,6 +18,8 @@ data class Exchange(
     val flag: String,
     val scheduleUrl: String = "",
     val isSelected: Boolean = true,
+    // Display order for custom sorting
+    val displayOrder: Int = 0,
     // Current local time at the exchange's location
     val currentLocalTime: LocalTime = LocalTime.now(timezone),
     // Whether the exchange is currently open

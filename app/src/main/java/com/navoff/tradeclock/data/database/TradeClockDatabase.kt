@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.navoff.tradeclock.data.database.dao.ExchangeDao
 import com.navoff.tradeclock.data.database.entity.ExchangeEntity
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
  */
 @Database(
     entities = [ExchangeEntity::class],
-    version = 1,
+    version = 2, // Increased version number
     exportSchema = false
 )
 abstract class TradeClockDatabase : RoomDatabase() {
@@ -27,6 +28,30 @@ abstract class TradeClockDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: TradeClockDatabase? = null
 
+        /**
+         * Migration from database version 1 to 2.
+         * Adds the displayOrder column to the exchanges table and initializes it based on the current order.
+         */
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Add the displayOrder column with a default value of 0
+                database.execSQL("ALTER TABLE exchanges ADD COLUMN displayOrder INTEGER NOT NULL DEFAULT 0")
+
+                // Initialize displayOrder for each exchange based on ID to ensure a stable order
+                // This is a simpler approach that avoids complex subqueries
+                val cursor = database.query("SELECT id FROM exchanges ORDER BY continent, name")
+                var order = 0
+
+                cursor.use {
+                    while (cursor.moveToNext()) {
+                        val id = cursor.getString(cursor.getColumnIndexOrThrow("id"))
+                        database.execSQL("UPDATE exchanges SET displayOrder = $order WHERE id = '$id'")
+                        order++
+                    }
+                }
+            }
+        }
+
         fun getDatabase(context: Context): TradeClockDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -34,7 +59,7 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     TradeClockDatabase::class.java,
                     "tradeclock_database"
                 )
-                .fallbackToDestructiveMigration()
+                .addMigrations(MIGRATION_1_2) // Add the migration
                 .addCallback(object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)

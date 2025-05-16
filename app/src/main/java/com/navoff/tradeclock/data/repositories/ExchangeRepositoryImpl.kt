@@ -37,4 +37,12 @@ class ExchangeRepositoryImpl @Inject constructor(
     override suspend fun getExchangeById(exchangeId: String): Exchange? {
         return exchangeDao.getExchangeById(exchangeId)?.toDomainModel()
     }
+
+    override suspend fun updateExchangeDisplayOrder(exchangeId: String, displayOrder: Int) {
+        exchangeDao.updateExchangeDisplayOrder(exchangeId, displayOrder)
+    }
+
+    override suspend fun updateExchangeDisplayOrders(updates: Map<String, Int>) {
+        exchangeDao.updateExchangeDisplayOrders(updates)
+    }
 }

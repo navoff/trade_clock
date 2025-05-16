@@ -24,7 +24,8 @@ data class ExchangeEntity(
     val city: String,
     val flag: String,
     val scheduleUrl: String = "",
-    val isSelected: Boolean = true
+    val isSelected: Boolean = true,
+    val displayOrder: Int = 0 // Default order is 0, will be set during migration
 ) {
     /**
      * Convert this database entity to a domain model.
@@ -41,7 +42,8 @@ data class ExchangeEntity(
             city = city,
             flag = flag,
             scheduleUrl = scheduleUrl,
-            isSelected = isSelected
+            isSelected = isSelected,
+            displayOrder = displayOrder
         )
     }
 
@@ -63,7 +65,8 @@ data class ExchangeEntity(
                 city = exchange.city,
                 flag = exchange.flag,
                 scheduleUrl = exchange.scheduleUrl,
-                isSelected = exchange.isSelected
+                isSelected = exchange.isSelected,
+                displayOrder = exchange.displayOrder
             )
         }
     }
