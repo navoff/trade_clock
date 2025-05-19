@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
  */
 @Database(
     entities = [ExchangeEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class TradeClockDatabase : RoomDatabase() {
@@ -28,6 +28,20 @@ abstract class TradeClockDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: TradeClockDatabase? = null
 
+        // Migration from version 1 to 2: Add weekday columns
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Add weekday columns with default values
+                database.execSQL("ALTER TABLE exchanges ADD COLUMN isOpenMonday INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE exchanges ADD COLUMN isOpenTuesday INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE exchanges ADD COLUMN isOpenWednesday INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE exchanges ADD COLUMN isOpenThursday INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE exchanges ADD COLUMN isOpenFriday INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE exchanges ADD COLUMN isOpenSaturday INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE exchanges ADD COLUMN isOpenSunday INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun getDatabase(context: Context): TradeClockDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -35,7 +49,7 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     TradeClockDatabase::class.java,
                     "tradeclock_database"
                 )
-                .fallbackToDestructiveMigration()
+                .addMigrations(MIGRATION_1_2)
                 .addCallback(object : RoomDatabase.Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
@@ -70,7 +84,14 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "UK",
                     city = "London",
                     flag = "🇬🇧",
-                    scheduleUrl = "https://www.tradinghours.com/markets/lse"
+                    scheduleUrl = "https://www.tradinghours.com/markets/lse",
+                    isOpenMonday = true,
+                    isOpenTuesday = true,
+                    isOpenWednesday = true,
+                    isOpenThursday = true,
+                    isOpenFriday = true,
+                    isOpenSaturday = false,
+                    isOpenSunday = false
                 ),
 
                 ExchangeEntity(
@@ -85,7 +106,14 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "USA",
                     city = "New York",
                     flag = "🇺🇸",
-                    scheduleUrl = "https://www.tradinghours.com/markets/nyse"
+                    scheduleUrl = "https://www.tradinghours.com/markets/nyse",
+                    isOpenMonday = true,
+                    isOpenTuesday = true,
+                    isOpenWednesday = true,
+                    isOpenThursday = true,
+                    isOpenFriday = true,
+                    isOpenSaturday = false,
+                    isOpenSunday = false
                 ),
 
                 ExchangeEntity(
@@ -100,7 +128,14 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "Japan",
                     city = "Tokyo",
                     flag = "🇯🇵",
-                    scheduleUrl = "https://www.tradinghours.com/markets/tse"
+                    scheduleUrl = "https://www.tradinghours.com/markets/tse",
+                    isOpenMonday = true,
+                    isOpenTuesday = true,
+                    isOpenWednesday = true,
+                    isOpenThursday = true,
+                    isOpenFriday = true,
+                    isOpenSaturday = false,
+                    isOpenSunday = false
                 ),
 
                 ExchangeEntity(
@@ -115,7 +150,14 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "Switzerland",
                     city = "Zurich",
                     flag = "🇨🇭",
-                    scheduleUrl = "https://www.tradinghours.com/markets/seb"
+                    scheduleUrl = "https://www.tradinghours.com/markets/seb",
+                    isOpenMonday = true,
+                    isOpenTuesday = true,
+                    isOpenWednesday = true,
+                    isOpenThursday = true,
+                    isOpenFriday = true,
+                    isOpenSaturday = false,
+                    isOpenSunday = false
                 ),
 
                 ExchangeEntity(
@@ -130,7 +172,14 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "Mexico",
                     city = "Mexico City",
                     flag = "🇲🇽",
-                    scheduleUrl = "https://www.tradinghours.com/markets/bmv"
+                    scheduleUrl = "https://www.tradinghours.com/markets/bmv",
+                    isOpenMonday = true,
+                    isOpenTuesday = true,
+                    isOpenWednesday = true,
+                    isOpenThursday = true,
+                    isOpenFriday = true,
+                    isOpenSaturday = false,
+                    isOpenSunday = false
                 ),
 
                 ExchangeEntity(
@@ -145,7 +194,14 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "Russia",
                     city = "Moscow",
                     flag = "🇷🇺",
-                    scheduleUrl = "https://www.tradinghours.com/markets/moex"
+                    scheduleUrl = "https://www.tradinghours.com/markets/moex",
+                    isOpenMonday = true,
+                    isOpenTuesday = true,
+                    isOpenWednesday = true,
+                    isOpenThursday = true,
+                    isOpenFriday = true,
+                    isOpenSaturday = false,
+                    isOpenSunday = false
                 ),
 
                 ExchangeEntity(
@@ -160,7 +216,14 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "Hong Kong",
                     city = "Hong Kong",
                     flag = "🇭🇰",
-                    scheduleUrl = "https://www.tradinghours.com/markets/hkex"
+                    scheduleUrl = "https://www.tradinghours.com/markets/hkex",
+                    isOpenMonday = true,
+                    isOpenTuesday = true,
+                    isOpenWednesday = true,
+                    isOpenThursday = true,
+                    isOpenFriday = true,
+                    isOpenSaturday = false,
+                    isOpenSunday = false
                 ),
 
                 ExchangeEntity(
@@ -175,7 +238,14 @@ abstract class TradeClockDatabase : RoomDatabase() {
                     country = "USA",
                     city = "New York",
                     flag = "🇺🇸",
-                    scheduleUrl = "https://www.tradinghours.com/markets/nasdaq"
+                    scheduleUrl = "https://www.tradinghours.com/markets/nasdaq",
+                    isOpenMonday = true,
+                    isOpenTuesday = true,
+                    isOpenWednesday = true,
+                    isOpenThursday = true,
+                    isOpenFriday = true,
+                    isOpenSaturday = false,
+                    isOpenSunday = false
                 )
             )
 

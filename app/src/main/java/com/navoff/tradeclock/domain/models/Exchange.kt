@@ -20,6 +20,14 @@ data class Exchange(
     val isSelected: Boolean = true,
     // Display order for custom sorting
     val displayOrder: Int = 0,
+    // Weekday operation flags
+    val isOpenMonday: Boolean = true,
+    val isOpenTuesday: Boolean = true,
+    val isOpenWednesday: Boolean = true,
+    val isOpenThursday: Boolean = true,
+    val isOpenFriday: Boolean = true,
+    val isOpenSaturday: Boolean = false,
+    val isOpenSunday: Boolean = false,
     // Current local time at the exchange's location
     val currentLocalTime: LocalTime = LocalTime.now(timezone),
     // Whether the exchange is currently open

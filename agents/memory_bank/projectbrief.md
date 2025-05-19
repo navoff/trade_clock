@@ -35,7 +35,7 @@ TradeClock is an Android application designed to help users quickly check when v
 
 ## Future Enhancements (Planned)
 - Notifications for exchange opening/closing
-- Sorting options (by opening time, continent)
-- Dark theme support
+- Detailed exchange information screen
+- Search functionality
 - Home screen widget
 - Backend integration for dynamic exchange data

@@ -19,7 +19,6 @@
 | **StateFlow** | Reactive state holder | Kotlin Flow that represents a state with read-only public interface |
 | **Room** | Local database | SQLite abstraction layer with compile-time verification |
 | **Hilt** | Dependency injection | Simplified version of Dagger for Android |
-| **DataStore** | Preferences storage | Modern replacement for SharedPreferences |
 
 ### Time Management
 
@@ -29,6 +28,7 @@
 | **ZoneId** | Time zone representation | Identifies time zone for each exchange |
 | **LocalTime** | Time representation | Represents time without date or time zone |
 | **ZonedDateTime** | Time with zone | Represents date-time with time zone context |
+| **DayOfWeek** | Day representation | Enum representing days of the week (Monday-Sunday) |
 
 ### Asynchronous Programming
 
@@ -83,7 +83,7 @@ app/
 
 1. **Offline-First**: The app must function without internet connectivity
 2. **Battery Efficiency**: Time updates must be efficient to minimize battery usage
-3. **Accurate Time Handling**: Must correctly handle time zones and DST changes
+3. **Accurate Time Handling**: Must correctly handle time zones, DST changes, and weekday information
 4. **Lifecycle Awareness**: Must properly handle Android activity lifecycle
 5. **Memory Efficiency**: Should work well on devices with limited memory
 
@@ -227,7 +227,9 @@ data class ExchangeListUiState(
     val exchanges: List<Exchange> = emptyList(),
     val currentLocalTime: LocalDateTime = LocalDateTime.now(),
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    val isEditMode: Boolean = false,
+    val isDragging: Boolean = false
 )
 
 // State collection in Composable

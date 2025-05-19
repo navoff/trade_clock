@@ -25,7 +25,15 @@ data class ExchangeEntity(
     val flag: String,
     val scheduleUrl: String = "",
     val isSelected: Boolean = true,
-    val displayOrder: Int = 0 // Default order is 0, will be set during migration
+    val displayOrder: Int = 0, // Default order is 0, will be set during migration
+    // Weekday operation flags - by default exchanges operate Monday-Friday
+    val isOpenMonday: Boolean = true,
+    val isOpenTuesday: Boolean = true,
+    val isOpenWednesday: Boolean = true,
+    val isOpenThursday: Boolean = true,
+    val isOpenFriday: Boolean = true,
+    val isOpenSaturday: Boolean = false,
+    val isOpenSunday: Boolean = false
 ) {
     /**
      * Convert this database entity to a domain model.
@@ -43,7 +51,14 @@ data class ExchangeEntity(
             flag = flag,
             scheduleUrl = scheduleUrl,
             isSelected = isSelected,
-            displayOrder = displayOrder
+            displayOrder = displayOrder,
+            isOpenMonday = isOpenMonday,
+            isOpenTuesday = isOpenTuesday,
+            isOpenWednesday = isOpenWednesday,
+            isOpenThursday = isOpenThursday,
+            isOpenFriday = isOpenFriday,
+            isOpenSaturday = isOpenSaturday,
+            isOpenSunday = isOpenSunday
         )
     }
 
@@ -66,7 +81,14 @@ data class ExchangeEntity(
                 flag = exchange.flag,
                 scheduleUrl = exchange.scheduleUrl,
                 isSelected = exchange.isSelected,
-                displayOrder = exchange.displayOrder
+                displayOrder = exchange.displayOrder,
+                isOpenMonday = exchange.isOpenMonday,
+                isOpenTuesday = exchange.isOpenTuesday,
+                isOpenWednesday = exchange.isOpenWednesday,
+                isOpenThursday = exchange.isOpenThursday,
+                isOpenFriday = exchange.isOpenFriday,
+                isOpenSaturday = exchange.isOpenSaturday,
+                isOpenSunday = exchange.isOpenSunday
             )
         }
     }

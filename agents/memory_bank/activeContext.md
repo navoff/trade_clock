@@ -26,7 +26,8 @@ The current focus is on:
 
 4. Enhancing the database:
    - Adding country, city, and flag fields to the Exchange model
-   - Creating a database migration to update the schema
+   - Adding weekday information to track which days exchanges are open
+   - Creating database migrations to update the schema
    - Populating the database with more detailed exchange information
 
 5. Fixing exchange filtering functionality:
@@ -43,6 +44,31 @@ The current focus is on:
 These features are critical for the app's core functionality, as users need accurate, up-to-date information about exchange operating hours presented in a visually intuitive way.
 
 ## Recent Changes
+
+### Database Enhancement: Added Weekday Tracking
+
+We've added weekday tracking to the app to account for the fact that exchanges only operate on weekdays (Monday-Friday) and are closed on weekends (Saturday-Sunday):
+
+1. Updated the database schema:
+   - Added boolean fields for each day of the week (`isOpenMonday`, `isOpenTuesday`, etc.)
+   - Created a migration from version 1 to 2 to add these new columns
+   - Set default values (Monday-Friday = true, Saturday-Sunday = false)
+
+2. Updated the Exchange model:
+   - Added corresponding boolean fields in both the entity and domain models
+   - Updated conversion methods between entity and domain models
+
+3. Enhanced status calculation:
+   - Modified `updateExchangesWithTimeInfo` in `ExchangeListViewModel` to check both:
+     - If the current time is within opening/closing hours
+     - If the exchange is open on the current day of the week
+   - Exchange is only considered open if both conditions are met
+
+4. Updated initial data:
+   - Set all exchanges to operate Monday-Friday
+   - Set all exchanges to be closed on Saturday and Sunday
+
+This enhancement ensures that the app correctly shows exchanges as closed on weekends, even if the current time is within their normal operating hours.
 
 ### Database Enhancement: Added New Exchanges
 
@@ -517,20 +543,16 @@ private fun calculateTimeRemaining(exchange: Exchange): String {
    - Test the time remaining calculation for accuracy
    - Ensure animations are smooth and performant
 
-4. **UI Refinements**:
-   - Consider adding animations for status changes
-   - Improve visual distinction between open and closed exchanges
-   - Refine the expanded view layout for better readability
-
-5. **Performance Optimization**:
+4. **Performance Optimization**:
    - Profile the app to ensure time updates don't cause performance issues
    - Optimize the exchange status calculation if needed
    - Ensure efficient recomposition when items expand/collapse
 
-6. **Additional Features**:
-   - Add sorting options (by opening time, continent)
-   - Consider adding a dark theme
-   - Add ability to customize which information is shown in expanded view
+5. **Additional Features**:
+   - Implement detailed exchange information screen
+   - Add search functionality
+   - Develop home screen widget
+   - Prepare for backend integration for dynamic exchange data
 
 ## Active Decisions and Considerations
 

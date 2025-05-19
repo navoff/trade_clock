@@ -48,11 +48,11 @@ TradeClock follows the **Clean Architecture** pattern with **MVVM** (Model-View-
 │  └─────────────────┘                           │
 │           │                                     │
 │           ▼                                     │
-│  ┌─────────────────┐  ┌─────────────────────┐  │
-│  │                 │  │                     │  │
-│  │  Room Database  │  │     DataStore       │  │
-│  │                 │  │                     │  │
-│  └─────────────────┘  └─────────────────────┘  │
+│  ┌─────────────────┐                           │
+│  │                 │                           │
+│  │  Room Database  │                           │
+│  │                 │                           │
+│  └─────────────────┘                           │
 │                                                 │
 └─────────────────────────────────────────────────┘
 ```
@@ -125,8 +125,10 @@ TradeClock follows the **Clean Architecture** pattern with **MVVM** (Model-View-
 
 2. **Exchange Status Calculation**:
    - Current time is obtained for the exchange's time zone
-   - Opening and closing times are compared with current time
-   - Status is determined (open/closed)
+   - Current day of week is determined for the exchange's time zone
+   - Day of week is checked against exchange's operating days (Monday-Friday)
+   - If it's an operating day, opening and closing times are compared with current time
+   - Status is determined (open/closed) based on both day of week and time of day
    - UI reflects the status with appropriate styling
 
 3. **App Lifecycle Management**:

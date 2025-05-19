@@ -1,93 +1,141 @@
-# tradeclock_android
+# TradeClock Android
 
+TradeClock is an Android application designed to help traders, investors, and financial professionals quickly check when various stock exchanges around the world open and close. The app displays the current local time of the user, along with a list of exchanges showing their local times, opening/closing hours, and current status (open/closed).
 
+## Features
 
-## Getting started
+- **Real-time Exchange Status**: Instantly see which exchanges are currently open or closed
+- **Global Exchange Coverage**: Track major stock exchanges from around the world
+- **Local Time Display**: View the current local time at each exchange's location
+- **Automatic Updates**: Time and status information updates every minute while the app is active
+- **Customizable Exchange List**: Select which exchanges to display and reorder them according to your preference
+- **Expandable Exchange Details**: Tap on an exchange to see more detailed information
+- **Weekday Awareness**: Correctly handles weekday vs. weekend operating schedules
+- **Visual Status Indicators**: Clear visual distinction between open and closed exchanges
+- **Drag and Drop Reordering**: Easily reorder exchanges in edit mode with intuitive drag and drop
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Technologies Used
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### Core Technologies
 
-## Add your files
+- **Kotlin**: Modern, concise language officially supported by Android
+- **Jetpack Compose**: Declarative UI toolkit for building native Android UI
+- **Android SDK**: Core Android platform functionality
+- **Gradle**: Manages dependencies and build process
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+### Architecture Components
 
+- **Clean Architecture**: Clear separation of concerns with domain, data, and presentation layers
+- **MVVM Pattern**: Model-View-ViewModel architecture for the presentation layer
+- **ViewModel**: Manages UI-related data in a lifecycle-conscious way
+- **StateFlow**: Reactive state holder for UI state management
+- **Room**: SQLite abstraction layer with compile-time verification
+- **Hilt**: Dependency injection framework for Android
+
+### Time Management
+
+- **ThreeTenABP**: Android backport of java.time (JSR-310)
+- **ZoneId**: Identifies time zone for each exchange
+- **LocalTime**: Represents time without date or time zone
+- **ZonedDateTime**: Represents date-time with time zone context
+
+### Asynchronous Programming
+
+- **Coroutines**: Kotlin's solution for asynchronous programming
+- **Flow**: Reactive streams for asynchronous data
+- **BroadcastReceiver**: Android component for receiving system broadcasts
+
+## Project Structure
+
+```text
+app/
+├── src/
+│   ├── main/
+│   │   ├── java/com/navoff/tradeclock/
+│   │   │   ├── data/                  # Data layer
+│   │   │   │   ├── database/          # Room database
+│   │   │   │   ├── repositories/      # Repository implementations
+│   │   │   │
+│   │   │   ├── domain/                # Domain layer
+│   │   │   │   ├── models/            # Domain models
+│   │   │   │   ├── repositories/      # Repository interfaces
+│   │   │   │   ├── usecases/          # Use cases
+│   │   │   │
+│   │   │   ├── presentation/          # Presentation layer
+│   │   │   │   ├── components/        # Reusable UI components
+│   │   │   │   ├── screens/           # App screens
+│   │   │   │   ├── viewmodels/        # ViewModels
+│   │   │   │
+│   │   │   ├── di/                    # Dependency injection
+│   │   │   ├── ui/                    # UI theme
+│   │   │   ├── MainActivity.kt        # Main activity
+│   │   │   └── TradeClockApplication.kt # Application class
+│   │   │
+│   │   ├── res/                       # Resources
+│   │   └── AndroidManifest.xml
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/navoff/tradeclock_android.git
-git branch -M main
-git push -uf origin main
-```
 
-## Integrate with your tools
+## Setup and Installation
 
-- [ ] [Set up project integrations](https://gitlab.com/navoff/tradeclock_android/-/settings/integrations)
+### Requirements
 
-## Collaborate with your team
+- Android Studio Arctic Fox (2021.3.1) or newer
+- Minimum SDK: API 21 (Android 5.0)
+- Target SDK: API 34 (Android 14)
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### Building the Project
 
-## Test and Deploy
+1. Clone the repository:
+   ```
+   git clone https://github.com/navoff/trade_clock.git
+   ```
+2. Open the project in Android Studio
+3. Sync Gradle files
+4. Build and run the app on an emulator or physical device
 
-Use the built-in continuous integration in GitLab.
+## Current Status
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+The app is in a functional state with the following features implemented:
 
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+- Basic app structure with Clean Architecture and MVVM pattern
+- Room database setup for storing exchange information
+- Exchange list display with Jetpack Compose
+- Current time display in the app header
+- Local time display for each exchange
+- Exchange status calculation (open/closed) based on time and day of week
+- Weekday tracking (exchanges open Monday-Friday, closed on weekends)
+- Visual distinction between open and closed exchanges
+- Automatic time updates every minute when app is active
+- Immediate time updates when app is resumed
+- Exchange filtering functionality (showing/hiding based on selection)
+- Edit mode with all exchanges available for selection
+- Drag and drop reordering of exchanges in edit mode
 
 ## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+
+### Planned Features
+
+- Detailed exchange information screen
+- Search functionality
+- Home screen widget
+- Notifications for exchange opening/closing
+- Backend integration for dynamic exchange data
 
 ## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+Contributions are welcome! If you'd like to contribute to the project, please follow these steps:
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Merge Request
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- [ThreeTenABP](https://github.com/JakeWharton/ThreeTenABP) for time handling
+- [Trading Hours](https://www.tradinghours.com) for exchange schedule information

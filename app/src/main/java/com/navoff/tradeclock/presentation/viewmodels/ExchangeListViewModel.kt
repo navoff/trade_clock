@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.LocalTime
 import org.threeten.bp.ZonedDateTime
@@ -83,13 +84,29 @@ class ExchangeListViewModel @Inject constructor(
             // Calculate current local time at the exchange's location
             val now = ZonedDateTime.now(exchange.timezone)
             val localTime = LocalTime.of(now.hour, now.minute)
+            val dayOfWeek = now.dayOfWeek
 
-            // Calculate if the exchange is open
-            val isOpen = if (exchange.openingTime.isBefore(exchange.closingTime)) {
+            // Check if the exchange is open on the current day of the week
+            val isOpenToday = when (dayOfWeek) {
+                DayOfWeek.MONDAY -> exchange.isOpenMonday
+                DayOfWeek.TUESDAY -> exchange.isOpenTuesday
+                DayOfWeek.WEDNESDAY -> exchange.isOpenWednesday
+                DayOfWeek.THURSDAY -> exchange.isOpenThursday
+                DayOfWeek.FRIDAY -> exchange.isOpenFriday
+                DayOfWeek.SATURDAY -> exchange.isOpenSaturday
+                DayOfWeek.SUNDAY -> exchange.isOpenSunday
+                else -> false
+            }
+
+            // Calculate if the exchange is open based on time
+            val isOpenTime = if (exchange.openingTime.isBefore(exchange.closingTime)) {
                 localTime.isAfter(exchange.openingTime) && localTime.isBefore(exchange.closingTime)
             } else {
                 localTime.isAfter(exchange.openingTime) || localTime.isBefore(exchange.closingTime)
             }
+
+            // Exchange is only open if it's both the right time AND the right day
+            val isOpen = isOpenToday && isOpenTime
 
             // Create a new Exchange object with updated time information
             // Preserve the expanded state when updating time information

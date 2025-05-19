@@ -8,7 +8,8 @@
 - ✅ Exchange list display with Jetpack Compose
 - ✅ Current time display in the app header
 - ✅ Local time display for each exchange
-- ✅ Exchange status calculation (open/closed)
+- ✅ Exchange status calculation (open/closed) based on time and day of week
+- ✅ Weekday tracking (exchanges open Monday-Friday, closed on weekends)
 - ✅ Visual distinction between open and closed exchanges
 - ✅ Automatic time updates every minute when app is active
 - ✅ Immediate time updates when app is resumed
@@ -28,16 +29,10 @@
 ## What's Left to Build
 
 ### Core Features
-- ⬜ User preferences storage with DataStore
-- ⬜ Additional sorting options (by opening time, continent)
 - ⬜ Detailed exchange information screen
 - ⬜ Search functionality
 
 ### UI Enhancements
-- ⬜ Dark theme support
-- ⬜ Animations for status changes
-- ⬜ Improved visual design
-- ⬜ Accessibility improvements
 - ⬜ Home screen widget
 
 ### Technical Improvements
@@ -53,7 +48,15 @@ The app is in a functional state with the core time display, update features, ex
 
 The most recent work focused on fixing a bug where the new order of exchanges wasn't being saved when the "Save" button was pressed. This fix ensures that users' custom ordering of exchanges is properly persisted to the database, providing a consistent experience across app sessions.
 
-### Recent Milestone: Database Enhancement with New Exchanges
+### Recent Milestone: Weekday Tracking Implementation
+- Added weekday information to the database (which days exchanges are open)
+- Updated the Exchange model with boolean fields for each day of the week
+- Enhanced status calculation to consider both time and day of week
+- Created database migration to add weekday columns
+- Set all exchanges to operate Monday-Friday and be closed on weekends
+- Improved accuracy of exchange status display
+
+### Previous Milestone: Database Enhancement with New Exchanges
 - Added Moscow Exchange (MOEX) with trading hours 9:50 - 18:50 Moscow time
 - Added Hong Kong Stock Exchange (HKEX) with trading hours 9:30 - 16:00 Hong Kong time
 - Added NASDAQ with trading hours 9:30 - 16:00 Eastern time
@@ -106,7 +109,7 @@ The most recent work focused on fixing a bug where the new order of exchanges wa
 3. **Third Phase**: Automatic time updates
 4. **Fourth Phase**: Exchange filtering and edit mode
 5. **Current Phase**: Exchange reordering with drag and drop
-6. **Next Phase**: User preferences and additional sorting options
+6. **Next Phase**: Detailed exchange information screen and search functionality
 
 ### Technical Debt
 
@@ -117,16 +120,17 @@ The most recent work focused on fixing a bug where the new order of exchanges wa
 
 ## Next Development Priorities
 
-1. **User Preferences**: Add persistence for user settings using DataStore
-2. **UI Improvements**: Enhance the visual design and add animations
+1. **Detailed Exchange Information**: Add a detailed view for each exchange
+2. **Search Functionality**: Implement search for finding specific exchanges
 3. **Testing**: Add comprehensive unit and UI tests
-4. **Dark Theme**: Implement support for dark theme
-5. **Additional Sorting Options**: Add ability to sort exchanges by different criteria (beyond manual ordering)
+4. **Home Screen Widget**: Create a widget for quick access to exchange status
+5. **Backend Integration**: Prepare for dynamic exchange data from a backend service
 
 ## Lessons Learned
 
 1. **System Integration**: Leveraging system components like BroadcastReceiver can be more efficient than custom implementations
 2. **Time Handling**: Working with time zones and time calculations requires careful consideration of edge cases
+3. **Calendar Awareness**: Accounting for weekdays vs. weekends is essential for accurate exchange status display
 3. **State Management**: A single state object simplifies UI updates and state management
 4. **Lifecycle Awareness**: Proper lifecycle management is crucial for resource-efficient apps
 5. **Compose Benefits**: Jetpack Compose significantly simplifies UI development and state management
@@ -137,3 +141,4 @@ The most recent work focused on fixing a bug where the new order of exchanges wa
 10. **Haptic Feedback**: Tactile feedback significantly improves the user experience for interactive elements
 11. **Operation Order**: The order of database operations can be critical, especially when multiple related updates are performed
 12. **Error Handling**: Proper error handling with try-catch blocks helps identify and resolve issues more effectively
+13. **Database Migrations**: Incremental database migrations with default values ensure smooth updates for existing users

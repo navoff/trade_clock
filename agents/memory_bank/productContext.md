@@ -32,7 +32,6 @@ The app should provide a straightforward, glanceable interface that:
 2. **Clarity**: Information should be presented in a clean, easy-to-read format
 3. **Reliability**: Time and status information must be accurate and update reliably
 4. **Efficiency**: The app should use minimal system resources and battery
-5. **Accessibility**: Information should be readable for all users, including those with visual impairments
 
 ## Target Users
 
